@@ -1,0 +1,22 @@
+FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1
+ENV PIP_NO_CACHE_DIR=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libglib2.0-0 \
+    libgl1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-api.txt .
+
+RUN pip install --no-cache-dir -r requirements-api.txt
+
+COPY app.py .
+COPY templates ./templates
+
+EXPOSE 5000
+
+CMD ["gunicorn", "app:app", "-b", "0.0.0.0:5000", "--workers", "1", "--threads", "4", "--timeout", "300"]

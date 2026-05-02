@@ -1,0 +1,30 @@
+services:
+  model-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: yolo-model-api
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./model:/app/model:ro
+    gpus: all
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    restart: unless-stopped
+
+  tg-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    container_name: yolo-tg-bot
+    env_file:
+      - .env
+    environment:
+      - MODEL_API_URL=http://model-api:5000
+    depends_on:
+      - model-api
+    restart: unless-stopped
