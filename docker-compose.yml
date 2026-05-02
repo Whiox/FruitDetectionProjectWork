@@ -10,7 +10,6 @@ services:
       - .env
     volumes:
       - ./model:/app/model:ro
-    gpus: all
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
@@ -28,3 +27,11 @@ services:
     depends_on:
       - model-api
     restart: unless-stopped
+
+#  tunnel:
+#    image: cloudflare/cloudflared:latest
+#    container_name: yolo-cloudflare-tunnel
+#    command: tunnel --no-autoupdate --protocol http2 --url http://model-api:5000
+#    depends_on:
+#      - model-api
+#    restart: unless-stopped
