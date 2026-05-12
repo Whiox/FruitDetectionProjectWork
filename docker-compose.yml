@@ -4,15 +4,12 @@ services:
       context: .
       dockerfile: Dockerfile.api
     container_name: yolo-model-api
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     env_file:
       - .env
     volumes:
       - ./model:/app/model:ro
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     restart: unless-stopped
 
   tg-bot:
@@ -28,10 +25,21 @@ services:
       - model-api
     restart: unless-stopped
 
-#  tunnel:
-#    image: cloudflare/cloudflared:latest
-#    container_name: yolo-cloudflare-tunnel
-#    command: tunnel --no-autoupdate --protocol http2 --url http://model-api:5000
-#    depends_on:
-#      - model-api
-#    restart: unless-stopped
+  caddy:
+    image: caddy:2-alpine
+    container_name: fruitdet-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - model-api
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
